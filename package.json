@@ -1,0 +1,28 @@
+{
+  "name": "tablebite",
+  "version": "1.0.0",
+  "description": "Production-grade contactless QR menu, kitchen KDS Kanban, and instant UPI payments for modern restaurants.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "test:phase3": "node test-phase3.js",
+    "test:phase4": "node test-phase4.js",
+    "test:phase5": "node test-phase5.js",
+    "test:phase6": "node test-phase6.js",
+    "test": "node test-phase6.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "restaurant",
+    "qr-menu",
+    "kds",
+    "contactless-ordering",
+    "upi-payments",
+    "pos"
+  ],
+  "author": "TableBite Team",
+  "license": "MIT"
+}

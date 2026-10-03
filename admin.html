@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COFFEE_PALACE &bull; Admin &amp; Kitchen Portal</title>
+  <meta name="description" content="Live Kitchen Order Display (KOT), Menu CMS, and Sales Dashboard for TableBite.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body class="admin-body">
+
+  <!-- ==========================================
+       1. ADMIN AUTH / LOGIN MODAL
+       ========================================== -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand-badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+        </div>
+        <h1 class="login-title">Table<span>Bite</span> Staff Portal</h1>
+        <p class="login-subtitle">Kitchen Display &bull; Menu CMS &bull; Live Sales</p>
+      </div>
+
+      <!-- Quick PIN Pad or Email Login Toggle -->
+      <div class="login-tabs">
+        <button type="button" class="login-tab-btn active" id="tabPinBtn">Quick PIN</button>
+        <button type="button" class="login-tab-btn" id="tabEmailBtn">Email &amp; Password</button>
+      </div>
+
+      <!-- Form 1: Quick 4-digit PIN -->
+      <form id="pinLoginForm" class="login-form">
+        <div class="pin-display">
+          <span class="pin-dot" id="dot1"></span>
+          <span class="pin-dot" id="dot2"></span>
+          <span class="pin-dot" id="dot3"></span>
+          <span class="pin-dot" id="dot4"></span>
+        </div>
+        <input type="password" id="pinInput" class="pin-hidden-input" maxlength="4" autofocus autocomplete="off">
+        <p class="login-hint">Default Master PIN: <strong>1234</strong></p>
+
+        <!-- Touch Keypad for Kitchen Tablets -->
+        <div class="keypad-grid">
+          <button type="button" class="key-btn" data-key="1">1</button>
+          <button type="button" class="key-btn" data-key="2">2</button>
+          <button type="button" class="key-btn" data-key="3">3</button>
+          <button type="button" class="key-btn" data-key="4">4</button>
+          <button type="button" class="key-btn" data-key="5">5</button>
+          <button type="button" class="key-btn" data-key="6">6</button>
+          <button type="button" class="key-btn" data-key="7">7</button>
+          <button type="button" class="key-btn" data-key="8">8</button>
+          <button type="button" class="key-btn" data-key="9">9</button>
+          <button type="button" class="key-btn text-btn" id="clearPinBtn">Clear</button>
+          <button type="button" class="key-btn" data-key="0">0</button>
+          <button type="button" class="key-btn text-btn" id="submitPinBtn">&rarr;</button>
+        </div>
+      </form>
+
+      <!-- Form 2: Email & Password -->
+      <form id="emailLoginForm" class="login-form hidden">
+        <div class="form-group">
+          <label for="adminEmail" class="form-label">Work Email</label>
+          <input type="email" id="adminEmail" class="form-control" value="admin@tablebite.com" required>
+        </div>
+        <div class="form-group">
+          <label for="adminPassword" class="form-label">Password</label>
+          <input type="password" id="adminPassword" class="form-control" value="admin123" required>
+        </div>
+        <button type="submit" class="admin-primary-btn" id="emailLoginSubmitBtn">
+          <span>Sign In to Admin</span>
+        </button>
+      </form>
+
+      <div class="quick-demo-wrapper" style="margin-top: 1rem; border-top: 1px dashed var(--admin-border); padding-top: 0.85rem; width: 100%;">
+        <button type="button" class="quick-demo-btn" id="quickDemoLoginBtn" style="width: 100%; height: 42px; border-radius: 8px; background: rgba(234, 88, 12, 0.15); border: 1.5px solid var(--primary); color: var(--primary); font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease;">
+          ⚡ 1-Tap Quick Unlock (Demo PIN: 1234)
+        </button>
+      </div>
+
+      <span class="login-error-msg" id="loginErrorMsg"></span>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       2. MAIN ADMIN PORTAL WRAPPER
+       ========================================== -->
+  <div class="admin-wrapper" id="adminWrapper">
+
+    <!-- Top Bar Navigation -->
+    <header class="admin-header">
+      <div class="header-left">
+        <div class="admin-brand">
+          <div class="admin-brand-icon">🍽️</div>
+          <div>
+            <h2 class="admin-brand-title">TableBite <span>Manager</span></h2>
+            <span class="admin-store-tag">Downtown Bistro &bull; Live</span>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="admin-nav" role="tablist">
+          <button type="button" class="admin-tab active" id="navKdsBtn" data-target="viewKds">
+            <span class="tab-icon">🔔</span>
+            <span>Kitchen KOT</span>
+            <span class="nav-badge" id="kdsActiveBadge">0</span>
+          </button>
+          <button type="button" class="admin-tab" id="navMenuBtn" data-target="viewMenu">
+            <span class="tab-icon">📋</span>
+            <span>Menu Manager</span>
+          </button>
+          <button type="button" class="admin-tab" id="navAnalyticsBtn" data-target="viewAnalytics">
+            <span class="tab-icon">📊</span>
+            <span>Sales Dashboard</span>
+          </button>
+          <button type="button" class="admin-tab" id="navTablesBtn" data-target="viewTables">
+            <span class="tab-icon">🪑</span>
+            <span>Tables &amp; QR</span>
+          </button>
+          <button type="button" class="admin-tab" id="navSettingsBtn" data-target="viewSettings">
+            <span class="tab-icon">⚙️</span>
+            <span>Shop Settings</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Header Right Controls -->
+      <div class="header-right">
+        <!-- Audio Chime Toggle -->
+        <button type="button" class="chime-toggle-btn active" id="chimeToggleBtn"
+          title="Toggle sound alerts on new orders">
+          <span class="chime-icon">🔔</span>
+          <span class="chime-text">Sound ON</span>
+        </button>
+
+        <!-- Customer Menu Shortcut -->
+        <a href="/" target="_blank" class="preview-link-btn" title="Open diner QR menu">
+          <span>Diner View &nearr;</span>
+        </a>
+
+        <!-- Logout Button -->
+        <button type="button" class="logout-btn" id="logoutBtn" title="Sign out of staff portal">
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Views Container -->
+    <main class="admin-main">
+
+      <!-- ==========================================
+           TAB 1: KITCHEN DISPLAY SYSTEM (KDS)
+           ========================================== -->
+      <section class="admin-view active" id="viewKds">
+        <div class="kds-toolbar">
+          <div class="kds-stats">
+            <span class="kds-stat-pill">Active Tickets: <strong id="kdsTotalCount">0</strong></span>
+            <span class="kds-stat-pill">Avg Prep Time: <strong>14m</strong></span>
+          </div>
+          <div class="kds-actions">
+            <button type="button" class="refresh-btn" id="manualRefreshKdsBtn">
+              <span>↻ Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Kanban Board (4 Columns) -->
+        <div class="kds-kanban-board">
+
+          <!-- Column 1: New Orders -->
+          <div class="kanban-col col-new">
+            <div class="col-header">
+              <div class="col-title-wrap">
+                <span class="col-indicator"></span>
+                <h3>New Orders</h3>
+              </div>
+              <span class="col-count" id="countColNew">0</span>
+            </div>
+            <div class="tickets-container" id="ticketsNew">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Column 2: In Kitchen / Cooking -->
+          <div class="kanban-col col-kitchen">
+            <div class="col-header">
+              <div class="col-title-wrap">
+                <span class="col-indicator"></span>
+                <h3>Cooking / In Kitchen</h3>
+              </div>
+              <span class="col-count" id="countColKitchen">0</span>
+            </div>
+            <div class="tickets-container" id="ticketsKitchen">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Column 3: Ready to Serve -->
+          <div class="kanban-col col-ready">
+            <div class="col-header">
+              <div class="col-title-wrap">
+                <span class="col-indicator"></span>
+                <h3>Ready to Serve</h3>
+              </div>
+              <span class="col-count" id="countColReady">0</span>
+            </div>
+            <div class="tickets-container" id="ticketsReady">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Column 4: Completed -->
+          <div class="kanban-col col-completed">
+            <div class="col-header">
+              <div class="col-title-wrap">
+                <span class="col-indicator"></span>
+                <h3>Served / Completed</h3>
+              </div>
+              <span class="col-count" id="countColCompleted">0</span>
+            </div>
+            <div class="tickets-container" id="ticketsCompleted">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 2: MENU MANAGEMENT CMS
+           ========================================== -->
+      <section class="admin-view hidden" id="viewMenu">
+        <div class="menu-cms-toolbar">
+          <div class="cms-search-wrap">
+            <input type="text" id="cmsSearchInput" class="cms-search-input"
+              placeholder="Search dishes to edit or toggle stock...">
+          </div>
+          <div class="cms-actions">
+            <select id="cmsCategoryFilter" class="cms-category-select">
+              <option value="all">All Categories</option>
+              <option value="hot-beverages">Hot Beverages ☕</option>
+              <option value="cold-beverages">Cold Drinks &amp; Boba 🧋</option>
+              <option value="puffs-fries">Puffs &amp; Fries 🍟</option>
+              <option value="sandwiches-maggi">Sandwiches &amp; Maggi 🥪</option>
+              <option value="momo-pasta-burgers">Momos, Pasta &amp; Burgers 🥟</option>
+              <option value="sweet-treats">Sweet Treats 🍰</option>
+            </select>
+            <button type="button" class="admin-primary-btn" id="openAddDishModalBtn">
+              <span>+ Add New Dish</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dishes Table / Grid -->
+        <div class="cms-table-card">
+          <table class="cms-table">
+            <thead>
+              <tr>
+                <th>Dish</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Diet / Flags</th>
+                <th>Stock (86 Switch)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cmsDishesTableBody">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 3: SALES & ANALYTICS DASHBOARD
+           ========================================== -->
+      <section class="admin-view hidden" id="viewAnalytics">
+        <!-- Metric Cards Grid -->
+        <div class="metrics-grid">
+
+          <div class="metric-card">
+            <div class="metric-icon rev-icon">💰</div>
+            <div>
+              <p class="metric-label">Today's Revenue</p>
+              <h3 class="metric-val" id="metricRevenue">₹0</h3>
+              <span class="metric-badge positive">+18% vs yesterday</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon orders-icon">📦</div>
+            <div>
+              <p class="metric-label">Total Orders</p>
+              <h3 class="metric-val" id="metricOrders">0</h3>
+              <span class="metric-badge neutral">Dine-in verified</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon aov-icon">📈</div>
+            <div>
+              <p class="metric-label">Avg Order Value (AOV)</p>
+              <h3 class="metric-val" id="metricAov">₹0</h3>
+              <span class="metric-badge positive">Healthy basket size</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon tables-icon">🍽️</div>
+            <div>
+              <p class="metric-label">Occupied Tables</p>
+              <h3 class="metric-val" id="metricTables">0 / 16</h3>
+              <span class="metric-badge neutral">Live dine-in seats</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Split Grid: Top Selling Items + Recent Orders -->
+        <div class="analytics-split-grid">
+
+          <!-- Top Selling Dishes -->
+          <div class="analytics-card">
+            <h3 class="card-title">🔥 Best Selling Dishes</h3>
+            <p class="card-subtitle">Highest volume dishes ordered today</p>
+            <div class="top-dishes-list" id="topDishesList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Recent Orders Log -->
+          <div class="analytics-card">
+            <h3 class="card-title">🧾 Recent Dine-in Orders</h3>
+            <p class="card-subtitle">Live ledger of today's customer tickets</p>
+            <div class="recent-orders-table-wrap">
+              <table class="recent-orders-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Table</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recentOrdersTableBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 4: TABLES & QR PREVIEW
+           ========================================== -->
+      <section class="admin-view hidden" id="viewTables">
+        <div class="tables-view-header">
+          <div>
+            <h2 class="view-title">Dining Room &amp; Table Provisioning</h2>
+            <p class="view-subtitle">Active tables with cryptographic QR tokens. Ready for printing in Phase 4.</p>
+          </div>
+          <button type="button" class="admin-primary-btn" id="printQrPreviewBtn">
+            <span>🖨️ Batch Print Table QRs</span>
+          </button>
+        </div>
+
+        <div class="tables-grid-container" id="adminTablesGrid">
+          <!-- Tables dynamically rendered -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 5: SHOP ONBOARDING & SETTINGS (Phase 6)
+           ========================================== -->
+      <section class="admin-view hidden" id="viewSettings">
+        <div class="tables-view-header">
+          <div>
+            <h2 class="view-title">Shop Onboarding &amp; Configuration</h2>
+            <p class="view-subtitle">Manage your restaurant brand profile, UPI settlement VPA, tax rates, and guest Wi-Fi.</p>
+          </div>
+        </div>
+
+        <form id="shopSettingsForm" class="settings-form-card">
+          <div class="settings-section">
+            <h3 class="settings-sec-title">🏪 Restaurant Identity</h3>
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="settingShopName" class="form-label">Restaurant Name *</label>
+                <input type="text" id="settingShopName" class="form-control" placeholder="TableBite Artisanal Diner" required>
+              </div>
+              <div class="form-group flex-2">
+                <label for="settingTagline" class="form-label">Brand Tagline</label>
+                <input type="text" id="settingTagline" class="form-control" placeholder="Artisanal Dine-in &bull; Contactless Experience">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="settings-sec-title">💳 Payments &amp; UPI Settlement</h3>
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="settingUpiVpa" class="form-label">Merchant UPI VPA ID * (For direct diner settlements)</label>
+                <input type="text" id="settingUpiVpa" class="form-control" placeholder="7702971510@ybl" required>
+              </div>
+              <div class="form-group flex-2">
+                <label for="settingMerchantName" class="form-label">Merchant Legal Display Name *</label>
+                <input type="text" id="settingMerchantName" class="form-control" placeholder="TableBite Restaurant" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="settingTaxPercent" class="form-label">GST / Tax Percentage (%) *</label>
+                <input type="number" id="settingTaxPercent" class="form-control" min="0" max="28" step="0.5" placeholder="5" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="settingCurrency" class="form-label">Currency Symbol *</label>
+                <input type="text" id="settingCurrency" class="form-control" placeholder="₹" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="settings-sec-title">📶 Guest Hospitality &amp; Wi-Fi</h3>
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="settingContactPhone" class="form-label">Support Contact Number</label>
+                <input type="text" id="settingContactPhone" class="form-control" placeholder="+91 98765 43210">
+              </div>
+              <div class="form-group flex-2">
+                <label for="settingWifiName" class="form-label">Guest Wi-Fi Network (SSID)</label>
+                <input type="text" id="settingWifiName" class="form-control" placeholder="TableBite_Guest">
+              </div>
+              <div class="form-group flex-2">
+                <label for="settingWifiPass" class="form-label">Guest Wi-Fi Password</label>
+                <input type="text" id="settingWifiPass" class="form-control" placeholder="tastybite2026">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-footer">
+            <button type="submit" class="admin-primary-btn" id="saveSettingsBtn">
+              <span>💾 Save Restaurant Configuration</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================
+       MODAL: ADD / EDIT DISH
+       ========================================== -->
+  <div class="modal-backdrop hidden" id="dishModalBackdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="dishModalTitle">Add New Dish</h3>
+        <button type="button" class="modal-close-btn" id="closeDishModalBtn">&times;</button>
+      </div>
+
+      <form id="dishForm" class="modal-body">
+        <input type="hidden" id="editDishId">
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="dishNameInput" class="form-label">Dish Name *</label>
+            <input type="text" id="dishNameInput" class="form-control" placeholder="e.g. Kadai Paneer Special" required>
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="dishCategorySelect" class="form-label">Category *</label>
+            <select id="dishCategorySelect" class="form-control" required>
+              <option value="hot-beverages">Hot Beverages</option>
+              <option value="cold-beverages">Cold Drinks &amp; Boba</option>
+              <option value="puffs-fries">Puffs &amp; Fries</option>
+              <option value="sandwiches-maggi">Sandwiches &amp; Maggi</option>
+              <option value="momo-pasta-burgers">Momos, Pasta &amp; Burgers</option>
+              <option value="sweet-treats">Sweet Treats</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="dishPriceInput" class="form-label">Base Price (₹) *</label>
+            <input type="number" id="dishPriceInput" class="form-control" placeholder="320" min="1" step="1" required>
+          </div>
+
+          <div class="form-group flex-2">
+            <label for="dishImageUrlInput" class="form-label">Image URL</label>
+            <input type="url" id="dishImageUrlInput" class="form-control" placeholder="https://images.unsplash.com/...">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="dishDescInput" class="form-label">Description</label>
+          <textarea id="dishDescInput" class="form-control" rows="2"
+            placeholder="Brief ingredient notes and flavor profile..."></textarea>
+        </div>
+
+        <div class="form-checkboxes-row">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="dishIsVegCheckbox" checked>
+            <span>Pure Vegetarian</span>
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" id="dishIsSpicyCheckbox">
+            <span>Spicy 🌶️</span>
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" id="dishIsBestsellerCheckbox">
+            <span>Mark as Bestseller ★</span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="admin-secondary-btn" id="cancelDishModalBtn">Cancel</button>
+          <button type="submit" class="admin-primary-btn" id="saveDishBtn">
+            <span>Save Dish to Catalog</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: SINGLE TABLE QR STANDEE PREVIEW
+       ========================================== -->
+  <div class="modal-backdrop hidden" id="singleQrModalBackdrop">
+    <div class="modal-card standee-modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="standeeModalTitle">Table 04 &bull; QR Standee Card</h3>
+        <button type="button" class="modal-close-btn" id="closeSingleQrModalBtn">&times;</button>
+      </div>
+      <div class="modal-body standee-modal-body">
+
+        <!-- Printable Table Card -->
+        <div class="printable-table-card" id="printableStandee">
+          <div class="standee-header">
+            <div class="standee-logo">🍽️</div>
+            <h2 class="standee-brand-name">Table<span>Bite</span></h2>
+            <p class="standee-tagline">Artisanal Dine-in &bull; Contactless Experience</p>
+          </div>
+
+          <div class="standee-table-box">
+            <span class="standee-label">YOUR TABLE NUMBER</span>
+            <span class="standee-number" id="standeeTableNum">04</span>
+          </div>
+
+          <!-- QR Code SVG Container -->
+          <div class="standee-qr-frame">
+            <div class="standee-qr-svg" id="standeeQrSvg"></div>
+          </div>
+
+          <!-- Instructions -->
+          <div class="standee-steps">
+            <div class="standee-step">
+              <span class="step-num">1</span>
+              <span>Open camera &amp; scan QR</span>
+            </div>
+            <div class="standee-step">
+              <span class="step-num">2</span>
+              <span>Select dishes &amp; customize</span>
+            </div>
+            <div class="standee-step">
+              <span class="step-num">3</span>
+              <span>Pay via UPI &amp; food arrives!</span>
+            </div>
+          </div>
+
+          <div class="standee-footer">
+            <span>No app download required &bull; Free Wi-Fi: <strong>TableBite_Guest</strong></span>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="admin-secondary-btn" id="downloadQrSvgBtn">Download SVG</button>
+        <button type="button" class="admin-primary-btn" id="printSingleCardBtn">
+          <span>🖨️ Print Standee Card</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: BATCH PRINT ALL TABLE CARDS
+       ========================================== -->
+  <div class="modal-backdrop hidden" id="batchPrintBackdrop">
+    <div class="modal-card batch-print-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Batch Print All Table Cards (Tables 1 to 16)</h3>
+        <button type="button" class="modal-close-btn" id="closeBatchPrintBtn">&times;</button>
+      </div>
+      <div class="modal-body batch-print-body" id="batchCardsContainer">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="admin-secondary-btn" id="cancelBatchPrintBtn">Close</button>
+        <button type="button" class="admin-primary-btn" id="triggerBatchPrintBtn">
+          <span>🖨️ Print All Cards (A4 / Letter)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="adminToastContainer" aria-live="polite"></div>
+
+  <!-- QR Generator Script -->
+  <script src="qr-generator.js"></script>
+  <script src="admin.js"></script>
+</body>
+
+</html>

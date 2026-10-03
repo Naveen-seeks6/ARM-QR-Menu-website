@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TableBite &bull; Dine-in QR Menu &amp; Ordering</title>
+  <meta name="description" content="Contactless table ordering, visual digital menu, and instant UPI payments for modern restaurants.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- PWA & Mobile Web App -->
+  <meta name="theme-color" content="#ea580c">
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ==========================================
+       APP HEADER (Sticky)
+       ========================================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-top">
+      <div class="brand-block">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">ARM <span>Coffee Place</span></h1>
+          <p class="brand-subtitle">Let's relax &bull; Kokapet</p>
+        </div>
+      </div>
+
+      <!-- Active Table Badge & Staff Admin Shortcut -->
+      <div class="header-actions-wrap">
+        <button class="table-badge" id="tableBadgeBtn" type="button" aria-label="Change dining table">
+          <span class="table-pin">📍</span>
+          <span class="table-text" id="activeTableText">Table 04</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <a href="/admin" class="staff-admin-badge" title="Open Kitchen & Admin Portal">
+          <span>👨‍🍳 Admin Portal</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Search Bar & Dietary Filter Row -->
+    <div class="search-filter-row">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          id="menuSearchInput" 
+          class="menu-search-input" 
+          placeholder="Search butter chicken, paneer, drinks..." 
+          autocomplete="off"
+        >
+        <button type="button" class="clear-search-btn hidden" id="clearSearchBtn" aria-label="Clear search">&times;</button>
+      </div>
+
+      <!-- Dietary Toggle Pill Filters -->
+      <div class="dietary-filter-group">
+        <button type="button" class="diet-btn" id="filterVegBtn" data-diet="veg">
+          <span class="diet-icon veg-icon"></span>
+          <span>Veg</span>
+        </button>
+        <button type="button" class="diet-btn" id="filterNonVegBtn" data-diet="nonveg">
+          <span class="diet-icon nonveg-icon"></span>
+          <span>Non-Veg</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Categories Navigation (Horizontal Scroll) -->
+    <nav class="categories-nav" id="categoriesNav" aria-label="Menu categories">
+      <!-- Injected dynamically from menu-data.js -->
+    </nav>
+  </header>
+
+  <!-- ==========================================
+       MAIN CONTENT: MENU LISTING
+       ========================================== -->
+  <main class="menu-container" id="menuContainer">
+    <!-- Category sections and product cards injected dynamically -->
+  </main>
+
+  <!-- ==========================================
+       FLOATING BOTTOM CART BAR
+       ========================================== -->
+  <div class="floating-cart-bar hidden" id="floatingCartBar">
+    <div class="cart-bar-left">
+      <div class="cart-bar-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span class="cart-count-badge" id="cartCountBadge">0</span>
+      </div>
+      <div class="cart-bar-pricing">
+        <span class="cart-items-summary" id="cartItemsSummary">0 Items</span>
+        <span class="cart-total-price" id="cartBarTotal">₹0</span>
+      </div>
+    </div>
+    <button type="button" class="cart-bar-cta-btn" id="openCartBtn">
+      <span>View Cart</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ==========================================
+       ITEM CUSTOMIZATION DRAWER (MODAL)
+       ========================================== -->
+  <div class="drawer-backdrop hidden" id="customiseBackdrop">
+    <div class="drawer-sheet" id="customiseDrawer" role="dialog" aria-labelledby="customiseDishTitle">
+      <div class="drawer-drag-handle"></div>
+      
+      <div class="drawer-header">
+        <div class="customise-dish-info">
+          <span class="diet-indicator" id="customiseDietIcon"></span>
+          <h2 class="drawer-title" id="customiseDishTitle">Dish Name</h2>
+        </div>
+        <button type="button" class="drawer-close-btn" id="closeCustomiseBtn" aria-label="Close customization">&times;</button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Portion Options -->
+        <div class="customise-section" id="portionSection">
+          <h3 class="customise-section-title">Select Portion <span class="required-tag">Required</span></h3>
+          <div class="options-group" id="portionsGroup"></div>
+        </div>
+
+        <!-- Add-on Extras -->
+        <div class="customise-section" id="addonsSection">
+          <h3 class="customise-section-title">Add-ons &amp; Extras <span class="optional-tag">Optional</span></h3>
+          <div class="options-group" id="addonsGroup"></div>
+        </div>
+
+        <!-- Cooking Instructions -->
+        <div class="customise-section">
+          <h3 class="customise-section-title">Special Cooking Notes</h3>
+          <textarea 
+            id="itemSpecialNote" 
+            class="cooking-note-input" 
+            placeholder="e.g. Less spicy, no onions, extra napkins please"
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Sticky Drawer Footer -->
+      <div class="drawer-footer">
+        <div class="customise-qty-selector">
+          <button type="button" class="qty-btn" id="customiseDecBtn">&minus;</button>
+          <span class="qty-val" id="customiseQtyVal">1</span>
+          <button type="button" class="qty-btn" id="customiseIncBtn">&plus;</button>
+        </div>
+        <button type="button" class="drawer-primary-btn" id="addCustomisedToCartBtn">
+          <span>Add to Order</span>
+          <span class="btn-price-tag" id="customiseTotalBtnPrice">₹0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CART & BILL REVIEW DRAWER
+       ========================================== -->
+  <div class="drawer-backdrop hidden" id="cartBackdrop">
+    <div class="drawer-sheet cart-drawer" id="cartDrawer" role="dialog" aria-labelledby="cartDrawerTitle">
+      <div class="drawer-drag-handle"></div>
+
+      <div class="drawer-header">
+        <div class="cart-header-title">
+          <h2 class="drawer-title" id="cartDrawerTitle">Your Order</h2>
+          <span class="cart-table-pill" id="cartTableBadge">Table 04</span>
+        </div>
+        <button type="button" class="drawer-close-btn" id="closeCartBtn" aria-label="Close cart">&times;</button>
+      </div>
+
+      <div class="drawer-body cart-body" id="cartItemsList">
+        <!-- Injected dynamically from cart state -->
+      </div>
+
+      <!-- Bill Summary Card -->
+      <div class="bill-summary-card" id="billSummaryCard">
+        <div class="bill-row">
+          <span>Item Subtotal</span>
+          <span id="billSubtotal">₹0</span>
+        </div>
+        <div class="bill-row">
+          <span>Restaurant GST (5%)</span>
+          <span id="billTax">₹0</span>
+        </div>
+        <div class="bill-row">
+          <span>Table Service &amp; Cutlery</span>
+          <span class="text-free">FREE</span>
+        </div>
+        <div class="bill-divider"></div>
+        <div class="bill-row bill-grand-total">
+          <strong>To Pay</strong>
+          <strong id="billGrandTotal">₹0</strong>
+        </div>
+      </div>
+
+      <!-- Cart Footer -->
+      <div class="drawer-footer">
+        <button type="button" class="drawer-primary-btn checkout-cta-btn" id="proceedToCheckoutBtn">
+          <span>Proceed to Checkout</span>
+          <span class="btn-price-tag" id="checkoutBtnTotal">₹0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CHECKOUT & PAYMENT MODAL
+       ========================================== -->
+  <div class="drawer-backdrop hidden" id="checkoutBackdrop">
+    <div class="drawer-sheet checkout-sheet" id="checkoutDrawer" role="dialog" aria-labelledby="checkoutTitle">
+      <div class="drawer-drag-handle"></div>
+
+      <div class="drawer-header">
+        <h2 class="drawer-title" id="checkoutTitle">Complete Order</h2>
+        <button type="button" class="drawer-close-btn" id="closeCheckoutBtn" aria-label="Close checkout">&times;</button>
+      </div>
+
+      <form id="checkoutForm" class="drawer-body checkout-form" novalidate>
+        <!-- Table Confirmation -->
+        <div class="checkout-table-banner">
+          <div class="table-icon-wrap">🍽️</div>
+          <div>
+            <strong>Serving at Table <span id="checkoutTableDisplay">04</span></strong>
+            <p>Food will be delivered directly to this table.</p>
+          </div>
+        </div>
+
+        <!-- Customer Contact Details -->
+        <div class="form-group">
+          <label for="customerName" class="form-label">Your Name</label>
+          <input 
+            type="text" 
+            id="customerName" 
+            class="form-control" 
+            placeholder="e.g. Rahul Sharma" 
+            required
+          >
+          <span class="field-error" id="nameError"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="customerPhone" class="form-label">Phone Number <span class="label-hint">(for order receipt)</span></label>
+          <div class="phone-input-wrap">
+            <span class="country-code">+91</span>
+            <input 
+              type="tel" 
+              id="customerPhone" 
+              class="form-control phone-control" 
+              placeholder="98765 43210" 
+              maxlength="10"
+              required
+            >
+          </div>
+          <span class="field-error" id="phoneError"></span>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <div class="payment-options-grid">
+            
+            <label class="payment-card selected">
+              <input type="radio" name="paymentMethod" value="upi_intent" checked>
+              <div class="payment-card-content">
+                <div class="payment-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                  </svg>
+                </div>
+                <div>
+                  <strong>Instant UPI (GPay / PhonePe)</strong>
+                  <p>1-tap payment from any installed UPI app</p>
+                </div>
+              </div>
+            </label>
+
+            <label class="payment-card">
+              <input type="radio" name="paymentMethod" value="upi_qr">
+              <div class="payment-card-content">
+                <div class="payment-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                </div>
+                <div>
+                  <strong>Dynamic UPI QR</strong>
+                  <p>Display QR code on screen to scan &amp; pay</p>
+                </div>
+              </div>
+            </label>
+
+            <label class="payment-card">
+              <input type="radio" name="paymentMethod" value="cash_counter">
+              <div class="payment-card-content">
+                <div class="payment-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
+                <div>
+                  <strong>Pay at Cash Counter</strong>
+                  <p>Settle bill with cashier when leaving</p>
+                </div>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <div class="checkout-actions">
+          <button type="submit" class="drawer-primary-btn" id="confirmOrderBtn">
+            <span class="btn-spinner hidden" id="orderSpinner"></span>
+            <span class="btn-text" id="confirmOrderBtnText">Pay &bull; ₹0</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       DYNAMIC UPI PAYMENT MODAL (Phase 5)
+       ========================================== -->
+  <div class="drawer-backdrop hidden" id="upiModalBackdrop">
+    <div class="drawer-sheet upi-payment-sheet" id="upiPaymentSheet" role="dialog" aria-labelledby="upiModalTitle">
+      <div class="drawer-header">
+        <div class="upi-header-brand">
+          <span class="upi-logo-badge">⚡ UPI FastPay</span>
+          <h2 class="drawer-title" id="upiModalTitle">Scan &amp; Pay Instant</h2>
+        </div>
+        <button type="button" class="drawer-close-btn" id="closeUpiModalBtn">&times;</button>
+      </div>
+
+      <div class="drawer-body upi-modal-body">
+        <div class="upi-amount-pill">
+          <span class="upi-amount-label">Amount Payable:</span>
+          <span class="upi-amount-value" id="upiAmountValue">₹0</span>
+        </div>
+
+        <div class="upi-qr-box">
+          <div class="upi-qr-svg-wrap" id="upiQrContainer">
+            <!-- Dynamic UPI QR SVG rendered here -->
+          </div>
+          <div class="upi-vpa-row">
+            <span class="upi-vpa-text" id="upiVpaText">7702971510@ybl</span>
+            <button type="button" class="upi-copy-vpa-btn" id="copyVpaBtn" title="Copy UPI ID">Copy</button>
+          </div>
+          <div class="upi-timer-badge">
+            <span class="timer-dot"></span>
+            <span>QR expires in <strong id="upiTimerDisplay">05:00</strong></span>
+          </div>
+        </div>
+
+        <div class="upi-app-badges">
+          <span class="app-badge">GPay</span>
+          <span class="app-badge">PhonePe</span>
+          <span class="app-badge">Paytm</span>
+          <span class="app-badge">BHIM</span>
+          <span class="app-badge">Cred</span>
+        </div>
+
+        <div class="upi-intent-action-wrap">
+          <a href="#" class="drawer-primary-btn upi-deep-link-btn" id="openUpiAppBtn">
+            <span>🚀 Open Installed UPI App</span>
+          </a>
+          <button type="button" class="upi-confirm-btn" id="confirmUpiPaidBtn">
+            <span>✓ I Have Paid &bull; Verify Now</span>
+          </button>
+        </div>
+
+        <p class="upi-guarantee-note">🔒 256-Bit Encrypted &bull; Direct NPCI UPI Gateway</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       LIVE ORDER STATUS TRACKER MODAL
+       ========================================== -->
+  <div class="drawer-backdrop hidden" id="trackerBackdrop">
+    <div class="drawer-sheet tracker-sheet" id="trackerSheet" role="dialog" aria-labelledby="trackerOrderCode">
+      <div class="tracker-celebrate-header">
+        <div class="check-circle-pulse">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h2 class="tracker-title">Order Confirmed!</h2>
+        <p class="tracker-order-id" id="trackerOrderCode">#TB-1049</p>
+        <span class="tracker-table-tag" id="trackerTableTag">Serving to Table 04</span>
+      </div>
+
+      <!-- Real-Time Progress Steps -->
+      <div class="tracker-timeline">
+        <div class="timeline-step step-active" id="step1">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <strong>Order Sent to Kitchen</strong>
+            <p>Ticket printed and received by cooking staff</p>
+          </div>
+        </div>
+        <div class="timeline-step" id="step2">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <strong>Cooking in Progress</strong>
+            <p>Chef is preparing your fresh meal</p>
+          </div>
+        </div>
+        <div class="timeline-step" id="step3">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <strong>Ready to Serve</strong>
+            <p>Plated and on the counter for pickup</p>
+          </div>
+        </div>
+        <div class="timeline-step" id="step4">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <strong>Served to Your Table</strong>
+            <p>Enjoy your meal at TableBite!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="tracker-items-card" id="trackerItemsCard"></div>
+
+      <div class="tracker-actions">
+        <button type="button" class="drawer-primary-btn" id="orderMoreBtn">
+          <span>Order More Items</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       TABLE NUMBER SELECTOR MODAL
+       ========================================== -->
+  <div class="drawer-backdrop hidden" id="tableSelectorBackdrop">
+    <div class="drawer-sheet table-selector-sheet" id="tableSelectorSheet" role="dialog" aria-labelledby="tableSelectorTitle">
+      <div class="drawer-header">
+        <h2 class="drawer-title" id="tableSelectorTitle">Select Your Table</h2>
+        <button type="button" class="drawer-close-btn" id="closeTableSelectorBtn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <p class="table-selector-hint">Select the table number printed on your table stand or QR card:</p>
+        <div class="table-grid" id="tablePickerGrid">
+          <!-- Tables 1 to 16 generated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Core Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="qr-generator.js"></script>
+  <script src="menu-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
